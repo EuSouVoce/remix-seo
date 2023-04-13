@@ -1,5 +1,5 @@
 {
-	"name": "remix-seo",
+	"name": "remix-seo-v2",
 	"version": "0.1.0",
 	"description": "A package for easily managing SEO metadata tags in Remix.",
 	"main": "./dist/index.js",
@@ -25,10 +25,10 @@
 	"author": "Chance Strickland <hi@chance.dev>",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/chaance/remix-seo"
+		"url": "https://github.com/EuSouVoce/remix-seo-v2"
 	},
 	"bugs": {
-		"url": "https://github.com/chaance/remix-seo/issues"
+		"url": "https://github.com/EuSouVoce/remix-seo-v2/issues"
 	},
 	"license": "MIT",
 	"dependencies": {

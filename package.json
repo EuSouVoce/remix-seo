@@ -12,6 +12,7 @@
 		"LICENSE"
 	],
 	"scripts": {
+		"postinstall":"npm run build",
 		"build": "tsup",
 		"test": "vitest",
 		"test:coverage": "vitest run --coverage"

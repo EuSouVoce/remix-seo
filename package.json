@@ -13,7 +13,7 @@
 	],
 	"scripts": {
 		"postinstall": "npm run build",
-		"build": "tsup",
+		"build": "npx tsup",
 		"test": "vitest",
 		"test:coverage": "vitest run --coverage"
 	},

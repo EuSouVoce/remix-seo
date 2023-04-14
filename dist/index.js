@@ -1,71 +1,76 @@
-import type { V2_MetaDescriptor } from "./interfaces";
-import type { HtmlLinkDescriptor, HtmlMetaDescriptor } from "@remix-run/react";
-
-import merge from "just-merge";
-import type {
-  SeoConfig,
-  SeoFunction,
-  SeoMetaFunction,
-  SeoLinksFunction,
-  RouteArgs,
-  TwitterMeta,
-  TwitterAppMeta,
-  TwitterPlayerMeta,
-  TwitterImageMeta,
-  TwitterCardType,
-} from "./interfaces";
-
 /**
- * A function for setting default SEO meta for Remix sites.
+ * remix-seo-v2 v0.1.0
  *
- * @param defaultConfig - The default configuration object. Each of the returned
- * functions will merge their own config with the default config when called on
- * a specific route.
- * @returns An object with three methods to use for getting SEO link and meta
- * tags on the site's routes.
+ * Copyright (c) 2022-2023, Chance Strickland
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @license MIT
  */
-export function initSeo(defaultConfig?: SeoConfig): {
-  getSeo: SeoFunction;
-  getSeoMeta: SeoMetaFunction;
-  getSeoLinks: SeoLinksFunction;
-} {
-  const getSeo: SeoFunction = (
-    cfg?: SeoConfig | ((routeArgs?: RouteArgs) => SeoConfig),
-    routeArgs?: RouteArgs
-  ): [V2_MetaDescriptor[], HtmlLinkDescriptor[]] => {
+
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// src/index.ts
+var src_exports = {};
+__export(src_exports, {
+  default: () => src_default,
+  initSeo: () => initSeo
+});
+module.exports = __toCommonJS(src_exports);
+var import_just_merge = __toESM(require("just-merge"));
+function initSeo(defaultConfig) {
+  const getSeo = (cfg, routeArgs) => {
     let config = resolveConfig(defaultConfig, cfg, routeArgs);
     let meta = getMeta(config, routeArgs);
     let links = getLinks(config, routeArgs);
     return [meta, links];
   };
-
-  const getSeoMeta: SeoMetaFunction = (
-    cfg?: SeoConfig | ((routeArgs?: RouteArgs) => SeoConfig),
-    routeArgs?: RouteArgs
-  ): V2_MetaDescriptor[] => {
+  const getSeoMeta = (cfg, routeArgs) => {
     let config = resolveConfig(defaultConfig, cfg, routeArgs);
     let meta = getMeta(config, routeArgs);
     return meta;
   };
-
-  const getSeoLinks: SeoLinksFunction = (
-    cfg?: SeoConfig | ((routeArgs?: RouteArgs) => SeoConfig),
-    routeArgs?: RouteArgs
-  ): HtmlLinkDescriptor[] => {
+  const getSeoLinks = (cfg, routeArgs) => {
     let config = resolveConfig(defaultConfig, cfg, routeArgs);
     let links = getLinks(config, routeArgs);
     return links;
   };
-
   return {
     getSeo,
     getSeoMeta,
-    getSeoLinks,
+    getSeoLinks
   };
 }
-
-function getMeta(config: SeoConfig, arg: any) {
-  let meta: HtmlMetaDescriptor = {};
+function getMeta(config, arg) {
+  let meta = {};
   let title = getSeoTitle(config);
   let {
     canonical,
@@ -74,18 +79,14 @@ function getMeta(config: SeoConfig, arg: any) {
     omitGoogleBotMeta = false,
     openGraph,
     robots = {},
-    twitter,
+    twitter
   } = config;
-
   if (title) {
     meta.title = title;
   }
-
   if (description) {
     meta.description = description;
   }
-
-  // Robots
   let {
     maxImagePreview,
     maxSnippet,
@@ -96,9 +97,8 @@ function getMeta(config: SeoConfig, arg: any) {
     noIndex,
     noSnippet,
     noTranslate,
-    unavailableAfter,
+    unavailableAfter
   } = robots;
-
   let robotsParams = [
     noArchive && "noarchive",
     noImageIndex && "noimageindex",
@@ -107,60 +107,44 @@ function getMeta(config: SeoConfig, arg: any) {
     maxImagePreview && `max-image-preview:${maxImagePreview}`,
     maxSnippet && `max-snippet:${maxSnippet}`,
     maxVideoPreview && `max-video-preview:${maxVideoPreview}`,
-    unavailableAfter && `unavailable_after:${unavailableAfter}`,
+    unavailableAfter && `unavailable_after:${unavailableAfter}`
   ];
-
-  let robotsParam =
-    (noIndex ? "noindex" : "index") + "," + (noFollow ? "nofollow" : "follow");
-
+  let robotsParam = (noIndex ? "noindex" : "index") + "," + (noFollow ? "nofollow" : "follow");
   for (let param of robotsParams) {
     if (param) {
       robotsParam += `,${param}`;
     }
   }
-
   meta.robots = robotsParam;
   if (!omitGoogleBotMeta) {
     meta.googlebot = meta.robots;
   }
-
-  // OG: Twitter
   if (twitter) {
     if (twitter.title || title) {
       meta["twitter:title"] = twitter.title || title;
     }
-
     if (twitter.description || openGraph?.description || description) {
-      meta["twitter:description"] =
-        twitter.description || openGraph?.description || description!;
+      meta["twitter:description"] = twitter.description || openGraph?.description || description;
     }
-
     if (twitter.card) {
       let cardType = validateTwitterCard(twitter);
       if (cardType) {
         meta["twitter:card"] = cardType;
       }
     }
-
     if (twitter.site) {
-      meta["twitter:site"] =
-        typeof twitter.site === "object" ? twitter.site.id : twitter.site;
+      meta["twitter:site"] = typeof twitter.site === "object" ? twitter.site.id : twitter.site;
     }
-
     if (twitter.creator) {
-      meta["twitter:creator"] =
-        typeof twitter.creator === "object"
-          ? twitter.creator.id
-          : twitter.creator;
+      meta["twitter:creator"] = typeof twitter.creator === "object" ? twitter.creator.id : twitter.creator;
     }
-
     if (hasTwitterImageMeta(twitter)) {
       warnIfInvalidUrl(
         twitter.image.url,
         `The twitter:image tag must be a valid, absolute URL. Relative paths will not work as expected. Check the config's \`twitter.image.url\` value.`
       );
       meta["twitter:image"] = twitter.image.url;
-      if (twitter.image!.alt) {
+      if (twitter.image.alt) {
         meta["twitter:image:alt"] = twitter.image.alt;
       } else {
         warn(
@@ -168,7 +152,6 @@ function getMeta(config: SeoConfig, arg: any) {
         );
       }
     }
-
     if (hasTwitterPlayerMeta(twitter)) {
       if (twitter.player.url) {
         warnIfInvalidUrl(
@@ -177,7 +160,6 @@ function getMeta(config: SeoConfig, arg: any) {
         );
         meta["twitter:player"] = twitter.player.url;
       }
-
       if (twitter.player.stream) {
         warnIfInvalidUrl(
           twitter.player.stream,
@@ -185,24 +167,19 @@ function getMeta(config: SeoConfig, arg: any) {
         );
         meta["twitter:player:stream"] = twitter.player.stream;
       }
-
       if (twitter.player.height) {
         meta["twitter:player:height"] = twitter.player.height.toString();
       }
-
       if (twitter.player.width) {
         meta["twitter:player:height"] = twitter.player.width.toString();
       }
     }
-
     if (hasTwitterAppMeta(twitter)) {
-      const twitterDevices = ["iPhone", "iPad", "googlePlay"] as const;
-
+      const twitterDevices = ["iPhone", "iPad", "googlePlay"];
       if (typeof twitter.app.name === "object") {
         for (const device of twitterDevices) {
           if (twitter.app.name[device]) {
-            meta[`twitter:app:name:${device.toLowerCase()}`] =
-              twitter.app.name[device]!;
+            meta[`twitter:app:name:${device.toLowerCase()}`] = twitter.app.name[device];
           }
         }
       } else {
@@ -210,26 +187,21 @@ function getMeta(config: SeoConfig, arg: any) {
         meta["twitter:app:name:ipad"] = twitter.app.name;
         meta["twitter:app:name:googleplay"] = twitter.app.name;
       }
-
       if (typeof twitter.app.id === "object") {
         for (const device of twitterDevices) {
           if (twitter.app.id[device]) {
-            meta[`twitter:app:id:${device.toLowerCase()}`] =
-              twitter.app.id[device]!;
+            meta[`twitter:app:id:${device.toLowerCase()}`] = twitter.app.id[device];
           }
         }
       }
-
       if (typeof twitter.app.url === "object") {
         for (const device of twitterDevices) {
           if (twitter.app.url[device]) {
-            meta[`twitter:app:url:${device.toLowerCase()}`] =
-              twitter.app.url[device]!;
+            meta[`twitter:app:url:${device.toLowerCase()}`] = twitter.app.url[device];
           }
         }
       }
     }
-
     if (!meta["twitter:card"]) {
       if (hasTwitterPlayerMeta(twitter)) {
         meta["twitter:card"] = "player";
@@ -240,23 +212,17 @@ function getMeta(config: SeoConfig, arg: any) {
       }
     }
   }
-
-  // OG: Facebook
   if (facebook) {
     if (facebook.appId) {
       meta["fb:app_id"] = facebook.appId;
     }
   }
-
-  // OG: Other stuff
   if (openGraph?.title || config.title) {
     meta["og:title"] = openGraph?.title || title;
   }
-
   if (openGraph?.description || description) {
-    meta["og:description"] = openGraph?.description || description!;
+    meta["og:description"] = openGraph?.description || description;
   }
-
   if (openGraph) {
     if (openGraph.url || canonical) {
       if (openGraph.url) {
@@ -271,28 +237,21 @@ function getMeta(config: SeoConfig, arg: any) {
           `The og:url tag must be a valid, absolute URL. Relative paths will not work as expected. Check the config's \`canonical\` value.`
         );
       }
-
-      meta["og:url"] = openGraph.url || canonical!;
+      meta["og:url"] = openGraph.url || canonical;
     }
-
     if (openGraph.type) {
       const ogType = openGraph.type.toLowerCase();
-
       meta["og:type"] = ogType;
-
       if (ogType === "profile" && openGraph.profile) {
         if (openGraph.profile.firstName) {
           meta["profile:first_name"] = openGraph.profile.firstName;
         }
-
         if (openGraph.profile.lastName) {
           meta["profile:last_name"] = openGraph.profile.lastName;
         }
-
         if (openGraph.profile.username) {
           meta["profile:username"] = openGraph.profile.username;
         }
-
         if (openGraph.profile.gender) {
           meta["profile:gender"] = openGraph.profile.gender;
         }
@@ -306,15 +265,12 @@ function getMeta(config: SeoConfig, arg: any) {
             }
           }
         }
-
         if (openGraph.book.isbn) {
           meta["book:isbn"] = openGraph.book.isbn;
         }
-
         if (openGraph.book.releaseDate) {
           meta["book:release_date"] = openGraph.book.releaseDate;
         }
-
         if (openGraph.book.tags && openGraph.book.tags.length) {
           for (let tag of openGraph.book.tags) {
             if (Array.isArray(meta["book:tag"])) {
@@ -328,15 +284,12 @@ function getMeta(config: SeoConfig, arg: any) {
         if (openGraph.article.publishedTime) {
           meta["article:published_time"] = openGraph.article.publishedTime;
         }
-
         if (openGraph.article.modifiedTime) {
           meta["article:modified_time"] = openGraph.article.modifiedTime;
         }
-
         if (openGraph.article.expirationTime) {
           meta["article:expiration_time"] = openGraph.article.expirationTime;
         }
-
         if (openGraph.article.authors && openGraph.article.authors.length) {
           for (let author of openGraph.article.authors) {
             if (Array.isArray(meta["article:author"])) {
@@ -346,11 +299,9 @@ function getMeta(config: SeoConfig, arg: any) {
             }
           }
         }
-
         if (openGraph.article.section) {
           meta["article:section"] = openGraph.article.section;
         }
-
         if (openGraph.article.tags && openGraph.article.tags.length) {
           for (let tag of openGraph.article.tags) {
             if (Array.isArray(meta["article:tag"])) {
@@ -360,57 +311,43 @@ function getMeta(config: SeoConfig, arg: any) {
             }
           }
         }
-      } else if (
-        (ogType === "video.movie" ||
-          ogType === "video.episode" ||
-          ogType === "video.tv_show" ||
-          ogType === "video.other") &&
-        openGraph.video
-      ) {
+      } else if ((ogType === "video.movie" || ogType === "video.episode" || ogType === "video.tv_show" || ogType === "video.other") && openGraph.video) {
         if (openGraph.video.actors && openGraph.video.actors.length) {
           for (let actor of openGraph.video.actors) {
             if (actor.profile) {
               meta["video:actor"] = actor.profile;
             }
-
             if (actor.role) {
               meta["video:actor:role"] = actor.role;
             }
           }
         }
-
         if (openGraph.video.directors && openGraph.video.directors.length) {
           for (let director of openGraph.video.directors) {
             meta["video:director"] = director;
           }
         }
-
         if (openGraph.video.writers && openGraph.video.writers.length) {
           for (let writer of openGraph.video.writers) {
             meta["video:writer"] = writer;
           }
         }
-
         if (openGraph.video.duration) {
           meta["video:duration"] = openGraph.video.duration.toString();
         }
-
         if (openGraph.video.releaseDate) {
           meta["video:release_date"] = openGraph.video.releaseDate;
         }
-
         if (openGraph.video.tags && openGraph.video.tags.length) {
           for (let tag of openGraph.video.tags) {
             meta["video:tag"] = tag;
           }
         }
-
         if (openGraph.video.series) {
           meta["video:series"] = openGraph.video.series;
         }
       }
     }
-
     if (openGraph.images && openGraph.images.length) {
       for (let image of openGraph.images) {
         warnIfInvalidUrl(
@@ -425,7 +362,6 @@ function getMeta(config: SeoConfig, arg: any) {
             "OpenGraph images should use alt text that describes the image. This is important for users who are visually impaired. Please add a text value to the `alt` key of all `openGraph.images` config options to dismiss this warning."
           );
         }
-
         if (image.secureUrl) {
           warnIfInvalidUrl(
             image.secureUrl,
@@ -433,21 +369,17 @@ function getMeta(config: SeoConfig, arg: any) {
           );
           meta["og:image:secure_url"] = image.secureUrl.toString();
         }
-
         if (image.type) {
           meta["og:image:type"] = image.type.toString();
         }
-
         if (image.width) {
           meta["og:image:width"] = image.width.toString();
         }
-
         if (image.height) {
           meta["og:image:height"] = image.height.toString();
         }
       }
     }
-
     if (openGraph.videos && openGraph.videos.length) {
       for (let video of openGraph.videos) {
         warnIfInvalidUrl(
@@ -458,7 +390,6 @@ function getMeta(config: SeoConfig, arg: any) {
         if (video.alt) {
           meta["og:video:alt"] = video.alt;
         }
-
         if (video.secureUrl) {
           warnIfInvalidUrl(
             video.secureUrl,
@@ -466,56 +397,48 @@ function getMeta(config: SeoConfig, arg: any) {
           );
           meta["og:video:secure_url"] = video.secureUrl.toString();
         }
-
         if (video.type) {
           meta["og:video:type"] = video.type.toString();
         }
-
         if (video.width) {
           meta["og:video:width"] = video.width.toString();
         }
-
         if (video.height) {
           meta["og:video:height"] = video.height.toString();
         }
       }
     }
-
     if (openGraph.locale) {
       meta["og:locale"] = openGraph.locale;
     }
-
     if (openGraph.siteName) {
       meta["og:site_name"] = openGraph.siteName;
     }
   }
-
-  let v2_meta: V2_MetaDescriptor[] = [];
+  let v2_meta = [];
   for (const key in meta) {
     if (key.indexOf("og:") === 0) {
       v2_meta.push({
         property: key,
-        content: meta[key] as string,
+        content: meta[key]
       });
     } else if (key.indexOf("twitter:") === 0) {
       v2_meta.push({
         property: key,
-        content: meta[key] as string,
+        content: meta[key]
       });
     } else if (key === "title") {
       v2_meta.push({ title });
     } else if (key.toLowerCase() === "charset") {
-      v2_meta.push({ charSet: meta[key] as string });
-    } else v2_meta.push({ name: key, content: meta[key] as string });
+      v2_meta.push({ charSet: meta[key] });
+    } else
+      v2_meta.push({ name: key, content: meta[key] });
   }
-
   return v2_meta;
 }
-
-function getLinks(config: SeoConfig, arg: any): HtmlLinkDescriptor[] {
-  let links: HtmlLinkDescriptor[] = [];
+function getLinks(config, arg) {
+  let links = [];
   let { canonical, mobileAlternate, languageAlternates = [] } = config;
-
   if (canonical) {
     warnIfInvalidUrl(
       canonical,
@@ -523,53 +446,41 @@ function getLinks(config: SeoConfig, arg: any): HtmlLinkDescriptor[] {
     );
     links.push({
       rel: "canonical",
-      href: canonical,
+      href: canonical
     });
   }
-
-  // <link rel="alternate">
   if (mobileAlternate) {
     if (!mobileAlternate.media || !mobileAlternate.href) {
       warn(
-        "`mobileAlternate` requires both the `media` and `href` attributes for it to generate the correct link tags. This config setting currently has no effect. Either add the missing keys or remove `mobileAlternate` from your config to dismiss this warning." +
-          // TODO: See if we can find a better description of this tag w/o all
-          // the marketing junk. MDN is a bit scant here.
-          "\n\nSee https://www.contentkingapp.com/academy/link-rel/#mobile-lok for a description of the tag this option generates."
+        "`mobileAlternate` requires both the `media` and `href` attributes for it to generate the correct link tags. This config setting currently has no effect. Either add the missing keys or remove `mobileAlternate` from your config to dismiss this warning.\n\nSee https://www.contentkingapp.com/academy/link-rel/#mobile-lok for a description of the tag this option generates."
       );
     } else {
       links.push({
         rel: "alternate",
         media: mobileAlternate.media,
-        href: mobileAlternate.href,
+        href: mobileAlternate.href
       });
     }
   }
-
   if (languageAlternates.length > 0) {
     for (let languageAlternate of languageAlternates) {
       if (!languageAlternate.hrefLang || !languageAlternate.href) {
         warn(
-          "Items in `languageAlternates` requires both the `hrefLang` and `href` attributes for it to generate the correct link tags. One of your items in this config setting is missing an attribute and was skipped. Either add the missing keys or remove the incomplete object from the `languageAlternate` key in your config to dismiss this warning." +
-            // TODO: See if we can find a better description of this tag w/o all
-            // the marketing junk. MDN is a bit scant here.
-            "\n\nSee https://www.contentkingapp.com/academy/link-rel/#hreflang-look-like for a description of the tag this option generates."
+          "Items in `languageAlternates` requires both the `hrefLang` and `href` attributes for it to generate the correct link tags. One of your items in this config setting is missing an attribute and was skipped. Either add the missing keys or remove the incomplete object from the `languageAlternate` key in your config to dismiss this warning.\n\nSee https://www.contentkingapp.com/academy/link-rel/#hreflang-look-like for a description of the tag this option generates."
         );
       } else {
         links.push({
           rel: "alternate",
           hrefLang: languageAlternate.hrefLang,
-          href: languageAlternate.href,
+          href: languageAlternate.href
         });
       }
     }
   }
-
   return links;
 }
-
-export default initSeo;
-
-function getSeoTitle(config: SeoConfig): string {
+var src_default = initSeo;
+function getSeoTitle(config) {
   let bypassTemplate = config.bypassTemplate || false;
   let templateTitle = config.titleTemplate || "";
   let updatedTitle = "";
@@ -583,35 +494,27 @@ function getSeoTitle(config: SeoConfig): string {
   }
   return updatedTitle;
 }
-
-function warn(message: string): void {
-  if (typeof console !== "undefined") console.warn("remix-seo: " + message);
+function warn(message) {
+  if (typeof console !== "undefined")
+    console.warn("remix-seo: " + message);
   try {
-    // This error is thrown as a convenience so you can more easily
-    // find the source for a warning that appears in the console by
-    // enabling "pause on exceptions" in your JavaScript debugger.
     throw new Error("remix-seo: " + message);
-  } catch (e) {}
+  } catch (e) {
+  }
 }
-
-function warnIfInvalidUrl(str: string, message: string) {
+function warnIfInvalidUrl(str, message) {
   try {
     new URL(str);
   } catch (_) {
-    if (typeof console !== "undefined") console.warn("remix-seo: " + message);
+    if (typeof console !== "undefined")
+      console.warn("remix-seo: " + message);
   }
 }
-
-function validateTwitterCard(
-  twitter: TwitterMeta
-): TwitterCardType | undefined {
+function validateTwitterCard(twitter) {
   if (!twitter.card) {
     return;
   }
-
-  if (
-    !["app", "player", "summary", "summary_large_image"].includes(twitter.card)
-  ) {
+  if (!["app", "player", "summary", "summary_large_image"].includes(twitter.card)) {
     warn(`An invalid Twitter card was provided to the config and will be ignored. Make sure that \`twitter.card\` is set to one of the following:
 - "app"
 - "player"
@@ -621,51 +524,39 @@ function validateTwitterCard(
 Read more: https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/markup`);
     return;
   }
-
   if (hasTwitterAppMeta(twitter)) {
     if (twitter.card !== "app") {
       warn(`An Twitter card type of \`${twitter.card}\` was provided to a config with app metadata. Twitter app cards must use a \`twitter:card\` value of \`"app"\`, so the app metadata will be ignored. Fix the \`twitter.card\` value or remove the \`twitter.app\` config to dismiss this warning.
 
 Read more: https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/markup`);
-      // @ts-ignore
       delete twitter.app;
     } else {
       if (hasTwitterImageMeta(twitter)) {
         warn(`The Twitter app card type does not support the twitter:image metadata provided in your config. Remove the \`twitter.image\` config to dismiss this warning.
 
 	Read more: https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/markup`);
-        // @ts-ignore
         delete twitter.image;
       }
-
       if (hasTwitterPlayerMeta(twitter)) {
         warn(`The Twitter app card type does not support the twitter:player metadata provided in your config. Remove the \`twitter.player\` config to dismiss this warning.
 
 	Read more: https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/markup`);
-        // @ts-ignore
         delete twitter.player;
       }
-
       return "app";
     }
   }
-
   if (hasTwitterPlayerMeta(twitter)) {
     if (twitter.card !== "player") {
       warn(`An Twitter card type of \`${twitter.card}\` was provided to a config with player metadata. Twitter player cards must use a \`twitter:card\` value of \`"player"\`, so the player metadata will be ignored. Fix the \`twitter.card\` value or remove the \`twitter.player\` config to dismiss this warning.
 
 Read more: https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/markup`);
-      // @ts-ignore
       delete twitter.player;
     } else {
       return "player";
     }
   }
-
-  if (
-    hasTwitterImageMeta(twitter) &&
-    !["summary", "summary_large_image", "player"].includes(twitter.card)
-  ) {
+  if (hasTwitterImageMeta(twitter) && !["summary", "summary_large_image", "player"].includes(twitter.card)) {
     if (twitter.card !== "player") {
       warn(`An Twitter card type of \`${twitter.card}\` was provided to a config with image metadata. Cards that support image metadata are:
 - "summary"
@@ -675,43 +566,27 @@ Read more: https://developer.twitter.com/en/docs/twitter-for-websites/cards/over
 The image metadata will be ignored. Fix the \`twitter.card\` value or remove the \`twitter.image\` config to dismiss this warning.
 
 Read more: https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/markup`);
-      // @ts-ignore
       delete twitter.image;
     }
   }
-
-  return twitter.card as TwitterCardType;
+  return twitter.card;
 }
-
-function hasTwitterAppMeta(twitter: TwitterMeta): twitter is TwitterMeta & {
-  app: { name: Required<TwitterAppMeta["name"]> } & TwitterAppMeta;
-} {
+function hasTwitterAppMeta(twitter) {
   return !!(twitter.app && twitter.app.name);
 }
-
-function hasTwitterPlayerMeta(twitter: TwitterMeta): twitter is TwitterMeta & {
-  player: TwitterPlayerMeta;
-} {
+function hasTwitterPlayerMeta(twitter) {
   return !!(twitter.player && (twitter.player.url || twitter.player.stream));
 }
-
-function hasTwitterImageMeta(twitter: TwitterMeta): twitter is TwitterMeta & {
-  image: { url: Required<TwitterImageMeta["url"]> } & TwitterImageMeta;
-} {
+function hasTwitterImageMeta(twitter) {
   return !!(twitter.image && twitter.image.url);
 }
-
-function resolveConfig(
-  defaultConfig: SeoConfig | undefined,
-  localConfig: SeoConfig | ((routeArgs?: RouteArgs) => SeoConfig) | undefined,
-  routeArgs: RouteArgs | undefined
-) {
-  let config: SeoConfig =
-    typeof localConfig === "function"
-      ? localConfig(routeArgs)
-      : localConfig || {};
-
-  config = defaultConfig ? merge({}, defaultConfig, config) : config;
-
+function resolveConfig(defaultConfig, localConfig, routeArgs) {
+  let config = typeof localConfig === "function" ? localConfig(routeArgs) : localConfig || {};
+  config = defaultConfig ? (0, import_just_merge.default)({}, defaultConfig, config) : config;
   return config;
 }
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  initSeo
+});
+//# sourceMappingURL=index.js.map

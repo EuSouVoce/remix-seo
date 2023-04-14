@@ -1,5 +1,5 @@
-import type { HtmlLinkDescriptor } from "@remix-run/react";
-import type { V2_HtmlMetaDescriptor } from "@remix-run/react/dist/routeModules";
+import type { HtmlLinkDescriptor, V2_MetaDescriptor } from "@remix-run/react";
+export type { V2_MetaDescriptor } from "@remix-run/react/dist/routeModules.d";
 
 export interface FacebookMeta {
   appId?: string;
@@ -335,10 +335,9 @@ export interface SeoBaseFunction<Return> {
 }
 
 export interface SeoFunction
-  extends SeoBaseFunction<[V2_HtmlMetaDescriptor[], HtmlLinkDescriptor[]]> {}
+  extends SeoBaseFunction<[V2_MetaDescriptor[], HtmlLinkDescriptor[]]> {}
 
-export interface SeoMetaFunction
-  extends SeoBaseFunction<V2_HtmlMetaDescriptor[]> {}
+export interface SeoMetaFunction extends SeoBaseFunction<V2_MetaDescriptor[]> {}
 
 export interface SeoLinksFunction
   extends SeoBaseFunction<HtmlLinkDescriptor[]> {}

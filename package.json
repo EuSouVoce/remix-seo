@@ -1,6 +1,6 @@
 {
 	"name": "remix-seo-v2",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "A package for easily managing SEO metadata tags in Remix.",
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",

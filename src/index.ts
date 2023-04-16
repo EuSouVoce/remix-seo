@@ -1,5 +1,10 @@
-import type { V2_MetaDescriptor } from "./interfaces";
-import type { HtmlLinkDescriptor, HtmlMetaDescriptor } from "@remix-run/react";
+import type {
+  HtmlLinkDescriptor,
+  HtmlMetaDescriptor,
+  SeoMetaFunctionV2,
+  V1_MetaDescriptor,
+  V2_MetaDescriptor,
+} from "./interfaces";
 
 import merge from "just-merge";
 import type {
@@ -27,24 +32,34 @@ import type {
 export function initSeo(defaultConfig?: SeoConfig): {
   getSeo: SeoFunction;
   getSeoMeta: SeoMetaFunction;
+  getSeoMetaV2: SeoMetaFunctionV2;
   getSeoLinks: SeoLinksFunction;
 } {
   const getSeo: SeoFunction = (
     cfg?: SeoConfig | ((routeArgs?: RouteArgs) => SeoConfig),
     routeArgs?: RouteArgs
-  ): [V2_MetaDescriptor[], HtmlLinkDescriptor[]] => {
+  ): [V1_MetaDescriptor, V2_MetaDescriptor[], HtmlLinkDescriptor[]] => {
     let config = resolveConfig(defaultConfig, cfg, routeArgs);
     let meta = getMeta(config, routeArgs);
+    let metaV2 = v1ToV2(meta);
     let links = getLinks(config, routeArgs);
-    return [meta, links];
+    return [meta, metaV2, links];
   };
 
   const getSeoMeta: SeoMetaFunction = (
     cfg?: SeoConfig | ((routeArgs?: RouteArgs) => SeoConfig),
     routeArgs?: RouteArgs
-  ): V2_MetaDescriptor[] => {
+  ): HtmlMetaDescriptor => {
     let config = resolveConfig(defaultConfig, cfg, routeArgs);
     let meta = getMeta(config, routeArgs);
+    return meta;
+  };
+  const getSeoMetaV2: SeoMetaFunctionV2 = (
+    cfg?: SeoConfig | ((routeArgs?: RouteArgs) => SeoConfig),
+    routeArgs?: RouteArgs
+  ): V2_MetaDescriptor[] => {
+    let config = resolveConfig(defaultConfig, cfg, routeArgs);
+    let meta = v1ToV2(getMeta(config, routeArgs));
     return meta;
   };
 
@@ -60,6 +75,7 @@ export function initSeo(defaultConfig?: SeoConfig): {
   return {
     getSeo,
     getSeoMeta,
+    getSeoMetaV2,
     getSeoLinks,
   };
 }
@@ -490,26 +506,7 @@ function getMeta(config: SeoConfig, arg: any) {
     }
   }
 
-  let v2_meta: V2_MetaDescriptor[] = [];
-  for (const key in meta) {
-    if (key.indexOf("og:") === 0) {
-      v2_meta.push({
-        property: key,
-        content: meta[key] as string,
-      });
-    } else if (key.indexOf("twitter:") === 0) {
-      v2_meta.push({
-        property: key,
-        content: meta[key] as string,
-      });
-    } else if (key === "title") {
-      v2_meta.push({ title });
-    } else if (key.toLowerCase() === "charset") {
-      v2_meta.push({ charSet: meta[key] as string });
-    } else v2_meta.push({ name: key, content: meta[key] as string });
-  }
-
-  return v2_meta;
+  return meta;
 }
 
 function getLinks(config: SeoConfig, arg: any): HtmlLinkDescriptor[] {
@@ -714,4 +711,60 @@ function resolveConfig(
   config = defaultConfig ? merge({}, defaultConfig, config) : config;
 
   return config;
+}
+
+function v1ToV2(metaV1: V1_MetaDescriptor): V2_MetaDescriptor[] {
+  const metaV2: V2_MetaDescriptor[] = [];
+
+  for (const key in metaV1) {
+    if (key === "charset" || key === "charSet") {
+      metaV2.push({ charSet: "utf-8" });
+    } else if (key === "title") {
+      metaV2.push({ title: metaV1[key] as string });
+    } else {
+      if (typeof metaV1[key] === "string") {
+        metaV2.push({ name: key, content: metaV1[key] as string });
+      } else if (metaV1[key] !== null && metaV1[key] !== undefined) {
+        for (const item of metaV1[key] as Array<
+          Record<string, string> | string
+        >) {
+          if (typeof item === "string") {
+            metaV2.push({ name: key, content: item });
+          } else {
+            const entry: Record<string, string> = { tagName: "meta", ...item };
+            metaV2.push(entry);
+          }
+        }
+      }
+    }
+  }
+
+  return metaV2;
+}
+
+function v2ToV1(metaV2: V2_MetaDescriptor[]): V1_MetaDescriptor {
+  const metaV1: V1_MetaDescriptor = {};
+
+  for (const entry of metaV2) {
+    if ("charSet" in entry || "charset" in entry) {
+      metaV1.charset = "utf-8";
+    } else if ("title" in entry) {
+      metaV1.title = entry.title as string;
+    } else if ("name" in entry) {
+      metaV1[entry.name as string] = entry.content as string;
+    } else if ("tagName" in entry) {
+      const key = entry.tagName as string;
+      delete entry.tagName;
+
+      if (metaV1[key] === undefined) {
+        metaV1[key] = [];
+      }
+
+      (metaV1[key] as Array<Record<string, string> | string>).push(
+        entry as any
+      );
+    }
+  }
+
+  return metaV1;
 }

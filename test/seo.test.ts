@@ -17,22 +17,26 @@ describe("init without default options", () => {
     describe("without an SEO config", () => {
       it("returns meta with *only* directives for bots", () => {
         let [meta] = getSeo();
-        meta.sort();
-        console.log(meta);
-        expect(meta.sort()).toEqual(
-          [
-            { name: "robots", content: "index,follow" },
-            {
-              name: "googlebot",
-              content: "index,follow",
-            },
-          ].sort()
-        );
+        expect(meta).toEqual({
+          googlebot: "index,follow",
+          robots: "index,follow",
+        });
       });
       it("returns no links", () => {
-        let [, links] = getSeo();
-        expect(links).toEqual([].sort());
+        let [, , links] = getSeo();
+        expect(links).toEqual([]);
       });
+    });
+
+    it("returns the correct title tags", () => {
+      let [meta, , links] = getSeo({ title: "Cheese and Crackers" });
+      expect(meta).toEqual({
+        title: "Cheese and Crackers",
+        "og:title": "Cheese and Crackers",
+        googlebot: "index,follow",
+        robots: "index,follow",
+      });
+      expect(links).toEqual([]);
     });
 
     it("fucks", () => {
@@ -71,83 +75,30 @@ describe("init without default options", () => {
 
       // meta
       expect(seo[0]).toMatchInlineSnapshot(`
-        [
-          {
-            "title": "Best website ever | Cool",
-          },
-          {
-            "content": "This is a really great website ya dork",
-            "name": "description",
-          },
-          {
-            "content": "noindex,nofollow",
-            "name": "robots",
-          },
-          {
-            "content": "noindex,nofollow",
-            "name": "googlebot",
-          },
-          {
-            "content": "Best website ever | Cool",
-            "property": "twitter:title",
-          },
-          {
-            "content": "This is a really great website ya dork",
-            "property": "twitter:description",
-          },
-          {
-            "content": "https://somewhere.com/fake-path.jpg",
-            "property": "twitter:image",
-          },
-          {
-            "content": "fake!",
-            "property": "twitter:image:alt",
-          },
-          {
-            "content": "summary",
-            "property": "twitter:card",
-          },
-          {
-            "content": "12345",
-            "name": "fb:app_id",
-          },
-          {
-            "content": "Best website ever | Cool",
-            "property": "og:title",
-          },
-          {
-            "content": "This is a really great website ya dork",
-            "property": "og:description",
-          },
-          {
-            "content": "https://somewhere.com",
-            "property": "og:url",
-          },
-          {
-            "content": "https://somewhere.com/fake-path.jpg",
-            "property": "og:image",
-          },
-          {
-            "content": "fake!",
-            "property": "og:image:alt",
-          },
-          {
-            "content": "jpg",
-            "property": "og:image:type",
-          },
-          {
-            "content": "200",
-            "property": "og:image:height",
-          },
-          {
-            "content": "Best website ever, yeah!",
-            "property": "og:site_name",
-          },
-        ]
-      `);
+			{
+			  "description": "This is a really great website ya dork",
+			  "fb:app_id": "12345",
+			  "googlebot": "noindex,nofollow",
+			  "og:description": "This is a really great website ya dork",
+			  "og:image": "https://somewhere.com/fake-path.jpg",
+			  "og:image:alt": "fake!",
+			  "og:image:height": "200",
+			  "og:image:type": "jpg",
+			  "og:site_name": "Best website ever, yeah!",
+			  "og:title": "Best website ever | Cool",
+			  "og:url": "https://somewhere.com",
+			  "robots": "noindex,nofollow",
+			  "title": "Best website ever | Cool",
+			  "twitter:card": "summary",
+			  "twitter:description": "This is a really great website ya dork",
+			  "twitter:image": "https://somewhere.com/fake-path.jpg",
+			  "twitter:image:alt": "fake!",
+			  "twitter:title": "Best website ever | Cool",
+			}
+		`);
 
       // links
-      expect(seo[1]).toMatchInlineSnapshot(`
+      expect(seo[2]).toMatchInlineSnapshot(`
 			[
 			  {
 			    "href": "https://somewhere.com",
@@ -162,16 +113,10 @@ describe("init without default options", () => {
     describe("without an SEO config", () => {
       it("returns an object with *only* directives for bots", () => {
         let meta = getSeoMeta();
-        meta.sort();
-        expect(meta.sort()).toEqual(
-          [
-            { name: "robots", content: "index,follow" },
-            {
-              name: "googlebot",
-              content: "index,follow",
-            },
-          ].sort()
-        );
+        expect(meta).toEqual({
+          googlebot: "index,follow",
+          robots: "index,follow",
+        });
       });
     });
   });
@@ -180,7 +125,7 @@ describe("init without default options", () => {
     describe("without an SEO config", () => {
       it("returns an empty array", () => {
         let links = getSeoLinks();
-        expect(links).toEqual([].sort());
+        expect(links).toEqual([]);
       });
     });
   });
@@ -196,17 +141,118 @@ describe("init with default options", () => {
 
   describe("getSeo", () => {
     describe("without an SEO config", () => {
-      let [meta, links] = getSeo();
-
+      let [meta, , links] = getSeo();
+      it("returns meta based on default config", () => {
+        expect(meta).toEqual({
+          title: "Cheese and Crackers | Cheese and Crackers",
+          "og:title": "Cheese and Crackers | Cheese and Crackers",
+          description:
+            "A great website about eating delicious cheese and crackers.",
+          "og:description":
+            "A great website about eating delicious cheese and crackers.",
+          googlebot: "index,follow",
+          robots: "index,follow",
+        });
+      });
       it("returns links based on default config", () => {
-        expect(links).toEqual(
-          [
-            {
-              rel: "canonical",
-              href: "https://somewhere-a.com",
-            },
-          ].sort()
-        );
+        expect(links).toEqual([
+          {
+            rel: "canonical",
+            href: "https://somewhere-a.com",
+          },
+        ]);
+      });
+    });
+
+    it("overrides the title tags", () => {
+      let [meta, , links] = getSeo({ title: "About us" });
+      expect(meta).toEqual({
+        title: "About us | Cheese and Crackers",
+        "og:title": "About us | Cheese and Crackers",
+        description:
+          "A great website about eating delicious cheese and crackers.",
+        "og:description":
+          "A great website about eating delicious cheese and crackers.",
+        googlebot: "index,follow",
+        robots: "index,follow",
+      });
+      expect(links).toEqual([
+        {
+          rel: "canonical",
+          href: "https://somewhere-a.com",
+        },
+      ]);
+    });
+
+    it("a page does not overwrite the initial default config", () => {
+      let [meta, , links] = getSeo({
+        title: "About us",
+        twitter: { card: "summary_large_image" },
+      });
+
+      expect(meta).toEqual({
+        title: "About us | Cheese and Crackers",
+        "og:title": "About us | Cheese and Crackers",
+        description:
+          "A great website about eating delicious cheese and crackers.",
+        "og:description":
+          "A great website about eating delicious cheese and crackers.",
+        "twitter:card": "summary_large_image",
+        "twitter:description":
+          "A great website about eating delicious cheese and crackers.",
+        "twitter:title": "About us | Cheese and Crackers",
+        googlebot: "index,follow",
+        robots: "index,follow",
+      });
+
+      expect(links).toEqual([
+        {
+          rel: "canonical",
+          href: "https://somewhere-a.com",
+        },
+      ]);
+      let [newMeta] = getSeo();
+      expect(newMeta).toEqual({
+        title: "Cheese and Crackers | Cheese and Crackers",
+        "og:title": "Cheese and Crackers | Cheese and Crackers",
+        description:
+          "A great website about eating delicious cheese and crackers.",
+        "og:description":
+          "A great website about eating delicious cheese and crackers.",
+        googlebot: "index,follow",
+        robots: "index,follow",
+      });
+    });
+  });
+
+  describe("getSeoMeta", () => {
+    describe("without an SEO config", () => {
+      let meta = getSeoMeta();
+      it("returns meta based on default config", () => {
+        expect(meta).toEqual({
+          title: "Cheese and Crackers | Cheese and Crackers",
+          "og:title": "Cheese and Crackers | Cheese and Crackers",
+          description:
+            "A great website about eating delicious cheese and crackers.",
+          "og:description":
+            "A great website about eating delicious cheese and crackers.",
+          googlebot: "index,follow",
+          robots: "index,follow",
+        });
+      });
+    });
+
+    it("overrides the title tags", () => {
+      let meta = getSeoMeta({ title: "About us" });
+      expect(meta).toEqual({
+        title: "About us | Cheese and Crackers",
+        "og:title": "About us | Cheese and Crackers",
+        description:
+          "A great website about eating delicious cheese and crackers.",
+        "og:description":
+          "A great website about eating delicious cheese and crackers.",
+        googlebot: "index,follow",
+        robots: "index,follow",
       });
     });
   });
@@ -215,27 +261,23 @@ describe("init with default options", () => {
     describe("without an SEO config", () => {
       let links = getSeoLinks();
       it("returns links based on default config", () => {
-        expect(links).toEqual(
-          [
-            {
-              rel: "canonical",
-              href: "https://somewhere-a.com",
-            },
-          ].sort()
-        );
+        expect(links).toEqual([
+          {
+            rel: "canonical",
+            href: "https://somewhere-a.com",
+          },
+        ]);
       });
     });
 
     it("overrides the default canonical link", () => {
       let links = getSeoLinks({ canonical: "https://somewhere-b.com" });
-      expect(links).toEqual(
-        [
-          {
-            rel: "canonical",
-            href: "https://somewhere-b.com",
-          },
-        ].sort()
-      );
+      expect(links).toEqual([
+        {
+          rel: "canonical",
+          href: "https://somewhere-b.com",
+        },
+      ]);
     });
   });
 });
@@ -250,17 +292,78 @@ describe("init with default options based on route data", () => {
 
   describe("getSeo", () => {
     describe("without an SEO config", () => {
-      let [, links] = getSeo();
-
+      let [meta, , links] = getSeo();
+      it("returns meta based on default config", () => {
+        expect(meta).toEqual({
+          title: "Cheese and Crackers | Cheese and Crackers",
+          "og:title": "Cheese and Crackers | Cheese and Crackers",
+          description:
+            "A great website about eating delicious cheese and crackers.",
+          "og:description":
+            "A great website about eating delicious cheese and crackers.",
+          googlebot: "index,follow",
+          robots: "index,follow",
+        });
+      });
       it("returns links based on default config", () => {
-        expect(links).toEqual(
-          [
-            {
-              rel: "canonical",
-              href: "https://somewhere-a.com",
-            },
-          ].sort()
-        );
+        expect(links).toEqual([
+          {
+            rel: "canonical",
+            href: "https://somewhere-a.com",
+          },
+        ]);
+      });
+    });
+
+    it("overrides the title tags", () => {
+      let [meta, , links] = getSeo({ title: "About us" });
+      expect(meta).toEqual({
+        title: "About us | Cheese and Crackers",
+        "og:title": "About us | Cheese and Crackers",
+        description:
+          "A great website about eating delicious cheese and crackers.",
+        "og:description":
+          "A great website about eating delicious cheese and crackers.",
+        googlebot: "index,follow",
+        robots: "index,follow",
+      });
+      expect(links).toEqual([
+        {
+          rel: "canonical",
+          href: "https://somewhere-a.com",
+        },
+      ]);
+    });
+  });
+
+  describe("getSeoMeta", () => {
+    describe("without an SEO config", () => {
+      let meta = getSeoMeta();
+      it("returns meta based on default config", () => {
+        expect(meta).toEqual({
+          title: "Cheese and Crackers | Cheese and Crackers",
+          "og:title": "Cheese and Crackers | Cheese and Crackers",
+          description:
+            "A great website about eating delicious cheese and crackers.",
+          "og:description":
+            "A great website about eating delicious cheese and crackers.",
+          googlebot: "index,follow",
+          robots: "index,follow",
+        });
+      });
+    });
+
+    it("overrides the title tags", () => {
+      let meta = getSeoMeta({ title: "About us" });
+      expect(meta).toEqual({
+        title: "About us | Cheese and Crackers",
+        "og:title": "About us | Cheese and Crackers",
+        description:
+          "A great website about eating delicious cheese and crackers.",
+        "og:description":
+          "A great website about eating delicious cheese and crackers.",
+        googlebot: "index,follow",
+        robots: "index,follow",
       });
     });
   });
@@ -269,27 +372,23 @@ describe("init with default options based on route data", () => {
     describe("without an SEO config", () => {
       let links = getSeoLinks();
       it("returns links based on default config", () => {
-        expect(links).toEqual(
-          [
-            {
-              rel: "canonical",
-              href: "https://somewhere-a.com",
-            },
-          ].sort()
-        );
+        expect(links).toEqual([
+          {
+            rel: "canonical",
+            href: "https://somewhere-a.com",
+          },
+        ]);
       });
     });
 
     it("overrides the default canonical link", () => {
       let links = getSeoLinks({ canonical: "https://somewhere-b.com" });
-      expect(links).toEqual(
-        [
-          {
-            rel: "canonical",
-            href: "https://somewhere-b.com",
-          },
-        ].sort()
-      );
+      expect(links).toEqual([
+        {
+          rel: "canonical",
+          href: "https://somewhere-b.com",
+        },
+      ]);
     });
   });
 });
@@ -430,7 +529,6 @@ describe("twitter config", () => {
           },
         },
       });
-      // @ts-ignore
       expect(meta["twitter:image"]).toBe(undefined);
     });
 
@@ -456,7 +554,6 @@ describe("twitter config", () => {
           },
         },
       });
-      // @ts-ignore
       expect(meta["twitter:player"]).toBe(undefined);
     });
   });
@@ -472,6 +569,40 @@ describe("twitter config", () => {
         },
       });
       expect(console.warn).toHaveBeenCalledTimes(1);
+    });
+
+    it("sets card type to 'player' if none is provided", () => {
+      let [meta] = getSeo({
+        twitter: {
+          player: {
+            url: "https://somewhere.com/fake-path.mp4",
+          },
+        },
+      });
+      expect(meta["twitter:card"]).toEqual("player");
+    });
+  });
+
+  describe("when app metadata is provided", () => {
+    it("sets card type to 'app' if none is provided", () => {
+      let [meta] = getSeo({
+        twitter: {
+          app: {
+            name: "Hello",
+            url: {
+              iPhone: "https://a.com",
+              iPad: "https://b.com",
+              googlePlay: "https://c.com",
+            },
+            id: {
+              iPhone: "1",
+              iPad: "2",
+              googlePlay: "3",
+            },
+          },
+        },
+      });
+      expect(meta["twitter:card"]).toEqual("app");
     });
   });
 });

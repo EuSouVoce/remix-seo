@@ -1,5 +1,5 @@
 /**
- * remix-seo-v2 v0.1.0
+ * remix-seo-v2 v0.2.1
  *
  * Copyright (c) 2022-2023, Chance Strickland
  *
@@ -50,12 +50,18 @@ function initSeo(defaultConfig) {
   const getSeo = (cfg, routeArgs) => {
     let config = resolveConfig(defaultConfig, cfg, routeArgs);
     let meta = getMeta(config, routeArgs);
+    let metaV2 = v1ToV2(meta);
     let links = getLinks(config, routeArgs);
-    return [meta, links];
+    return [meta, metaV2, links];
   };
   const getSeoMeta = (cfg, routeArgs) => {
     let config = resolveConfig(defaultConfig, cfg, routeArgs);
     let meta = getMeta(config, routeArgs);
+    return meta;
+  };
+  const getSeoMetaV2 = (cfg, routeArgs) => {
+    let config = resolveConfig(defaultConfig, cfg, routeArgs);
+    let meta = v1ToV2(getMeta(config, routeArgs));
     return meta;
   };
   const getSeoLinks = (cfg, routeArgs) => {
@@ -66,6 +72,7 @@ function initSeo(defaultConfig) {
   return {
     getSeo,
     getSeoMeta,
+    getSeoMetaV2,
     getSeoLinks
   };
 }
@@ -415,26 +422,7 @@ function getMeta(config, arg) {
       meta["og:site_name"] = openGraph.siteName;
     }
   }
-  let v2_meta = [];
-  for (const key in meta) {
-    if (key.indexOf("og:") === 0) {
-      v2_meta.push({
-        property: key,
-        content: meta[key]
-      });
-    } else if (key.indexOf("twitter:") === 0) {
-      v2_meta.push({
-        property: key,
-        content: meta[key]
-      });
-    } else if (key === "title") {
-      v2_meta.push({ title });
-    } else if (key.toLowerCase() === "charset") {
-      v2_meta.push({ charSet: meta[key] });
-    } else
-      v2_meta.push({ name: key, content: meta[key] });
-  }
-  return v2_meta;
+  return meta;
 }
 function getLinks(config, arg) {
   let links = [];
@@ -584,6 +572,30 @@ function resolveConfig(defaultConfig, localConfig, routeArgs) {
   let config = typeof localConfig === "function" ? localConfig(routeArgs) : localConfig || {};
   config = defaultConfig ? (0, import_just_merge.default)({}, defaultConfig, config) : config;
   return config;
+}
+function v1ToV2(metaV1) {
+  const metaV2 = [];
+  for (const key in metaV1) {
+    if (key === "charset" || key === "charSet") {
+      metaV2.push({ charSet: "utf-8" });
+    } else if (key === "title") {
+      metaV2.push({ title: metaV1[key] });
+    } else {
+      if (typeof metaV1[key] === "string") {
+        metaV2.push({ name: key, content: metaV1[key] });
+      } else if (metaV1[key] !== null && metaV1[key] !== void 0) {
+        for (const item of metaV1[key]) {
+          if (typeof item === "string") {
+            metaV2.push({ name: key, content: item });
+          } else {
+            const entry = { tagName: "meta", ...item };
+            metaV2.push(entry);
+          }
+        }
+      }
+    }
+  }
+  return metaV2;
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {

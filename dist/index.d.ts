@@ -1,5 +1,5 @@
 /**
- * remix-seo-v2 v0.1.0
+ * remix-seo-v2 v0.2.1
  *
  * Copyright (c) 2022-2023, Chance Strickland
  *
@@ -9,7 +9,8 @@
  * @license MIT
  */
 
-import { V2_MetaDescriptor, HtmlLinkDescriptor } from '@remix-run/react';
+import { HtmlLinkDescriptor } from '@remix-run/react';
+import { V1_HtmlMetaDescriptor, V2_MetaDescriptor } from '@remix-run/react/dist/routeModules.d';
 
 interface FacebookMeta {
     appId?: string;
@@ -333,9 +334,15 @@ interface SeoBaseFunction<Return> {
     (config?: SeoConfig): Return;
     (config: SeoConfig | ((routeArgs?: RouteArgs) => SeoConfig), routeArgs: RouteArgs): Return;
 }
-interface SeoFunction extends SeoBaseFunction<[V2_MetaDescriptor[], HtmlLinkDescriptor[]]> {
+interface SeoFunction extends SeoBaseFunction<[
+    V1_HtmlMetaDescriptor,
+    V2_MetaDescriptor[],
+    HtmlLinkDescriptor[]
+]> {
 }
-interface SeoMetaFunction extends SeoBaseFunction<V2_MetaDescriptor[]> {
+interface SeoMetaFunction extends SeoBaseFunction<V1_HtmlMetaDescriptor> {
+}
+interface SeoMetaFunctionV2 extends SeoBaseFunction<V2_MetaDescriptor[]> {
 }
 interface SeoLinksFunction extends SeoBaseFunction<HtmlLinkDescriptor[]> {
 }
@@ -352,6 +359,7 @@ interface SeoLinksFunction extends SeoBaseFunction<HtmlLinkDescriptor[]> {
 declare function initSeo(defaultConfig?: SeoConfig): {
     getSeo: SeoFunction;
     getSeoMeta: SeoMetaFunction;
+    getSeoMetaV2: SeoMetaFunctionV2;
     getSeoLinks: SeoLinksFunction;
 };
 

@@ -1,4 +1,8 @@
 import type { HtmlMetaDescriptor, HtmlLinkDescriptor } from "@remix-run/react";
+import {
+  V1_HtmlMetaDescriptor,
+  V2_MetaDescriptor,
+} from "@remix-run/react/dist/routeModules";
 import merge from "just-merge";
 
 /**
@@ -1019,3 +1023,61 @@ export interface SeoMetaFunction extends SeoBaseFunction<HtmlMetaDescriptor> {}
 
 export interface SeoLinksFunction
 	extends SeoBaseFunction<HtmlLinkDescriptor[]> {}
+
+
+export function v1ToV2Meta(metaV1: V1_HtmlMetaDescriptor): V2_MetaDescriptor[] {
+  const metaV2: V2_MetaDescriptor[] = [];
+
+  for (const key in metaV1) {
+    if (key === "charset" || key === "charSet") {
+      metaV2.push({ charSet: "utf-8" });
+    } else if (key === "title") {
+      metaV2.push({ title: metaV1[key] as string });
+    } else {
+      if (typeof metaV1[key] === "string") {
+        metaV2.push({ name: key, content: metaV1[key] as string });
+      } else if (metaV1[key] !== null && metaV1[key] !== undefined) {
+        for (const item of metaV1[key] as Array<
+          Record<string, string> | string
+        >) {
+          if (typeof item === "string") {
+            metaV2.push({ name: key, content: item });
+          } else {
+            const entry: Record<string, string> = { tagName: "meta", ...item };
+            metaV2.push(entry);
+          }
+        }
+      }
+    }
+  }
+
+  return metaV2;
+}
+
+export function v2ToV1Meta(metaV2: V2_MetaDescriptor[]): V1_HtmlMetaDescriptor {
+  const metaV1: V1_HtmlMetaDescriptor = {};
+
+  for (const entry of metaV2) {
+    if ("charSet" in entry || "charset" in entry) {
+      metaV1.charset = "utf-8";
+    } else if ("title" in entry) {
+      metaV1.title = entry.title as string;
+    } else if ("name" in entry) {
+      metaV1[entry.name as string] = entry.content as string;
+    } else if ("tagName" in entry) {
+      const key = entry.tagName as string;
+      delete entry.tagName;
+
+      if (metaV1[key] === undefined) {
+        metaV1[key] = [];
+      }
+
+      (metaV1[key] as Array<Record<string, string> | string>).push(
+        entry as any
+      );
+    }
+  }
+
+  return metaV1;
+}
+

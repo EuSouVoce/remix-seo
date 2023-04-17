@@ -363,4 +363,7 @@ declare function initSeo(defaultConfig?: SeoConfig): {
     getSeoLinks: SeoLinksFunction;
 };
 
-export { initSeo as default, initSeo };
+declare function v1ToV2(metaV1: V1_HtmlMetaDescriptor): V2_MetaDescriptor[];
+declare function v2ToV1(metaV2: V2_MetaDescriptor[]): V1_HtmlMetaDescriptor;
+
+export { initSeo as default, initSeo, v1ToV2, v2ToV1 };

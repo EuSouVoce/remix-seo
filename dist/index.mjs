@@ -563,8 +563,32 @@ function v1ToV2(metaV1) {
   }
   return metaV2;
 }
+function v2ToV1(metaV2) {
+  const metaV1 = {};
+  for (const entry of metaV2) {
+    if ("charSet" in entry || "charset" in entry) {
+      metaV1.charset = "utf-8";
+    } else if ("title" in entry) {
+      metaV1.title = entry.title;
+    } else if ("name" in entry) {
+      metaV1[entry.name] = entry.content;
+    } else if ("tagName" in entry) {
+      const key = entry.tagName;
+      delete entry.tagName;
+      if (metaV1[key] === void 0) {
+        metaV1[key] = [];
+      }
+      metaV1[key].push(
+        entry
+      );
+    }
+  }
+  return metaV1;
+}
 export {
   src_default as default,
-  initSeo
+  initSeo,
+  v1ToV2,
+  v2ToV1
 };
 //# sourceMappingURL=index.mjs.map

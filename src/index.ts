@@ -713,7 +713,7 @@ function resolveConfig(
   return config;
 }
 
-function v1ToV2(metaV1: V1_MetaDescriptor): V2_MetaDescriptor[] {
+export function v1ToV2(metaV1: V1_MetaDescriptor): V2_MetaDescriptor[] {
   const metaV2: V2_MetaDescriptor[] = [];
 
   for (const key in metaV1) {
@@ -742,7 +742,7 @@ function v1ToV2(metaV1: V1_MetaDescriptor): V2_MetaDescriptor[] {
   return metaV2;
 }
 
-function v2ToV1(metaV2: V2_MetaDescriptor[]): V1_MetaDescriptor {
+export function v2ToV1(metaV2: V2_MetaDescriptor[]): V1_MetaDescriptor {
   const metaV1: V1_MetaDescriptor = {};
 
   for (const entry of metaV2) {

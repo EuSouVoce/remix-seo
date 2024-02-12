@@ -37,15 +37,17 @@ type LdJsonArray = LdJsonValue[] | readonly LdJsonValue[];
 type LdJsonPrimitive = string | number | boolean | null;
 type LdJsonValue = LdJsonPrimitive | LdJsonObject | LdJsonArray;
 export type {
-  HtmlLinkDescriptor,
-  MetaDescriptor as HtmlMetaDescriptor, V1_MetaDescriptor, V2_MetaDescriptor
+	HtmlLinkDescriptor,
+	MetaDescriptor as HtmlMetaDescriptor,
+	V1_MetaDescriptor,
+	V2_MetaDescriptor,
 };
 interface V1_MetaDescriptor extends V1_HtmlMetaDescriptor {}
 interface V1_HtmlMetaDescriptor {
 	charset?: "utf-8";
 	charSet?: "utf-8";
 	title?: string;
-	[name: string]:unknown
+	[name: string]: unknown;
 }
 export interface FacebookMeta {
 	appId?: string;
@@ -376,7 +378,7 @@ export interface SeoBaseFunction<Return> {
 	(config?: SeoConfig): Return;
 	(
 		config: SeoConfig | ((routeArgs?: RouteArgs) => SeoConfig),
-		routeArgs: RouteArgs
+		routeArgs: RouteArgs,
 	): Return;
 }
 
@@ -392,3 +394,36 @@ export interface SeoMetaFunctionV2
 
 export interface SeoLinksFunction
 	extends SeoBaseFunction<HtmlLinkDescriptor[]> {}
+
+/**
+ * Old Server Runtime Meta Descriptor
+ */
+export type V2_ServerRuntimeMetaDescriptor =
+	| {
+			charSet: "utf-8";
+	  }
+	| {
+			title: string;
+	  }
+	| {
+			name: string;
+			content: string;
+	  }
+	| {
+			property: string;
+			content: string;
+	  }
+	| {
+			httpEquiv: string;
+			content: string;
+	  }
+	| {
+			"script:ld+json": LdJsonObject;
+	  }
+	| {
+			tagName: "meta" | "link";
+			[name: string]: string;
+	  }
+	| {
+			[name: string]: unknown;
+	  };

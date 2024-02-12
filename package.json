@@ -4,7 +4,7 @@
 	"description": "A package for easily managing SEO metadata tags in Remix.",
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
-	"types": "./dist/index.d.ts",
+	"types": "./dist/index.d.mts",
 	"files": [
 		"dist",
 		"src",

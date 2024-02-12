@@ -394,36 +394,3 @@ export interface SeoMetaFunctionV2
 
 export interface SeoLinksFunction
 	extends SeoBaseFunction<HtmlLinkDescriptor[]> {}
-
-/**
- * Old Server Runtime Meta Descriptor
- */
-export type V2_ServerRuntimeMetaDescriptor =
-	| {
-			charSet: "utf-8";
-	  }
-	| {
-			title: string;
-	  }
-	| {
-			name: string;
-			content: string;
-	  }
-	| {
-			property: string;
-			content: string;
-	  }
-	| {
-			httpEquiv: string;
-			content: string;
-	  }
-	| {
-			"script:ld+json": LdJsonObject;
-	  }
-	| {
-			tagName: "meta" | "link";
-			[name: string]: string;
-	  }
-	| {
-			[name: string]: unknown;
-	  };

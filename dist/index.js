@@ -1,5 +1,5 @@
 /**
- * remix-seo-v2 v0.2.3
+ * remix-seo-v2 v0.2.4
  *
  * Copyright (c) 2022-2024, Chance Strickland
  *

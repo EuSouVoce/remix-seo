@@ -1,5 +1,5 @@
 /**
- * remix-seo-v2 v0.2.3
+ * remix-seo-v2 v0.2.4
  *
  * Copyright (c) 2022-2024, Chance Strickland
  *
@@ -10,6 +10,7 @@
  */
 
 import { HtmlLinkDescriptor } from '@remix-run/react';
+export { HtmlLinkDescriptor, MetaDescriptor as HtmlMetaDescriptor } from '@remix-run/react';
 
 type V2_MetaDescriptor = {
     charSet: "utf-8";
@@ -403,4 +404,4 @@ declare function initSeo(defaultConfig?: SeoConfig): {
 declare function v1ToV2(metaV1: V1_MetaDescriptor): V2_MetaDescriptor[];
 declare function v2ToV1(metaV2: V2_MetaDescriptor[]): V1_MetaDescriptor;
 
-export { initSeo as default, initSeo, v1ToV2, v2ToV1 };
+export { type V1_MetaDescriptor, type V2_MetaDescriptor, initSeo as default, initSeo, v1ToV2, v2ToV1 };
